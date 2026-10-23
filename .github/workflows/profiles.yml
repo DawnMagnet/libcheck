@@ -49,11 +49,23 @@ jobs:
         run: |
           mkdir -p out
           failed=()
+          # Registries rate-limit anonymous pulls, so retry those failures.
+          pull() {
+            local n=0 err
+            until err=$(docker pull --quiet --platform "linux/$ARCH" "$1" 2>&1 >/dev/null); do
+              n=$((n + 1))
+              if [ "$n" -ge 5 ] || ! grep -qiE 'toomanyrequests|rate exceeded|timeout|TLS|EOF|unavailable' <<<"$err"; then
+                echo "$err" | tr '\n' ' '
+                return 1
+              fi
+              sleep $((n * 20))
+            done
+          }
           while IFS= read -r src; do
             id=$(jq -r .id <<<"$src"); name=$(jq -r .name <<<"$src")
             image=$(jq -r .image <<<"$src"); kernel=$(jq -r '.kernel // ""' <<<"$src")
-            if ! docker pull --quiet --platform "linux/$ARCH" "$image" >/dev/null; then
-              echo "::warning title=$id::no $ARCH image for $image"
+            if ! reason=$(pull "$image"); then
+              echo "::warning title=$id::cannot pull $image for $ARCH: $reason"
               failed+=("$id"); continue
             fi
             ref=$(docker image inspect --format '{{index .RepoDigests 0}}' "$image" 2>/dev/null || echo "$image")
