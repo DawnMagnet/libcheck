@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="728" height="454" viewBox="0 0 728 454" role="img" aria-label="libcheck terminal demo">
+<!-- generated from real libcheck output; see docs/ -->
+<rect width="728" height="454" rx="10" fill="#0d1117"/>
+<path d="M0 10a10 10 0 0 1 10-10h708a10 10 0 0 1 10 10v30H0z" fill="#161b22"/>
+<circle cx="22" cy="20" r="6" fill="#ff5f56"/><circle cx="42" cy="20" r="6" fill="#ffbd2e"/><circle cx="62" cy="20" r="6" fill="#27c93f"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" style="white-space:pre">
+<text x="24" y="64" textLength="151.2" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#8b949e">$ </tspan><tspan fill="#e6edf3" font-weight="700">libcheck ./myapp</tspan></text>
+<text x="24" y="85" textLength="302.4" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">./myapp: ELF64 x86_64 PIE executable</tspan></text>
+<text x="24" y="106" textLength="201.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">host: amd64, Linux 7.2.6</tspan></text>
+<text x="24" y="148" textLength="218.4" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#3fb950">[ OK ]</tspan><tspan fill="#e6edf3"> arch         x86_64</tspan></text>
+<text x="24" y="169" textLength="394.8" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#3fb950">[ OK ]</tspan><tspan fill="#e6edf3"> interpreter  /lib64/ld-linux-x86-64.so.2</tspan></text>
+<text x="24" y="190" textLength="411.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#3fb950">[ OK ]</tspan><tspan fill="#e6edf3"> kernel       needs &gt;= 3.2.0, running 7.2.6</tspan></text>
+<text x="24" y="211" textLength="327.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#3fb950">[ OK ]</tspan><tspan fill="#e6edf3"> libraries    5 loaded, 0 missing</tspan></text>
+<text x="24" y="232" textLength="453.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#f85149">[FAIL]</tspan><tspan fill="#e6edf3"> versions     13 symbol-version families checked</tspan></text>
+<text x="24" y="253" textLength="462.0" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">       libc.so.6  (/usr/lib/x86_64-linux-gnu/libc.so.6)</tspan></text>
+<text x="24" y="274" textLength="604.8" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">         </tspan><tspan fill="#f85149">[FAIL]</tspan><tspan fill="#e6edf3"> GLIBC   need 2.38     host 2.35       missing GLIBC_2.38</tspan></text>
+<text x="24" y="295" textLength="537.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">       libstdc++.so.6  (/opt/gcc-16.2/lib64/libstdc++.so.6.0.36)</tspan></text>
+<text x="24" y="316" textLength="411.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">         </tspan><tspan fill="#3fb950">[ OK ]</tspan><tspan fill="#e6edf3"> GLIBCXX need 3.4.36   host 3.4.36</tspan></text>
+<text x="24" y="358" textLength="151.2" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3" font-weight="700">RESULT: CANNOT RUN</tspan></text>
+<text x="24" y="379" textLength="680.4" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">  - myapp needs GLIBC_2.38 from libc.so.6, but this host provides only up to 2.35</tspan></text>
+<text x="24" y="400" textLength="75.6" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#8b949e">$ </tspan><tspan fill="#e6edf3" font-weight="700">echo $?</tspan></text>
+<text x="24" y="421" textLength="8.4" lengthAdjust="spacing" xml:space="preserve"><tspan fill="#e6edf3">1</tspan></text>
+</g>
+</svg>

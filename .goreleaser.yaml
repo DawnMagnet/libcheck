@@ -1,0 +1,58 @@
+version: 2
+project_name: libcheck
+
+builds:
+  - id: libcheck
+    main: .
+    binary: libcheck
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [amd64, arm64, arm, "386", riscv64, ppc64le, s390x, loong64]
+    goarm: ["7"]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: libcheck
+    formats: [tar.gz]
+    # Stable names so that releases/latest/download/<name> URLs keep working.
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
+    files: [LICENSE, README.md]
+
+checksum:
+  name_template: checksums.txt
+
+sboms:
+  - artifacts: archive
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^feat(\(.+\))?!?:'
+      order: 0
+    - title: Fixes
+      regexp: '^fix(\(.+\))?!?:'
+      order: 1
+    - title: Other
+      order: 99
+  filters:
+    exclude:
+      - '^docs(\(.+\))?:'
+      - '^ci(\(.+\))?:'
+      - '^chore(\(.+\))?:'
+      - '^test(\(.+\))?:'
+      - Merge pull request
+
+release:
+  footer: |
+    ## Verify
+
+    ```bash
+    sha256sum --check --ignore-missing checksums.txt
+    gh attestation verify libcheck_linux_amd64.tar.gz --repo {{ .Env.GITHUB_REPOSITORY }}
+    ```

@@ -1,0 +1,4 @@
+/libcheck
+/dist/
+*.test
+*.out
