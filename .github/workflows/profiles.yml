@@ -27,6 +27,7 @@ jobs:
   snapshot:
     name: Snapshot images (${{ matrix.arch }}, shard ${{ matrix.shard }})
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 8
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +57,7 @@ jobs:
           # Registries rate-limit anonymous pulls, so retry those failures.
           pull() {
             local n=0 err
-            until err=$(docker pull --quiet --platform "linux/$ARCH" "$1" 2>&1 >/dev/null); do
+            until err=$(timeout 120 docker pull --quiet --platform "linux/$ARCH" "$1" 2>&1 >/dev/null); do
               n=$((n + 1))
               if [ "$n" -ge 5 ] || ! grep -qiE 'toomanyrequests|rate exceeded|timeout|TLS|EOF|unavailable' <<<"$err"; then
                 echo "$err" | tr '\n' ' '
@@ -73,7 +74,7 @@ jobs:
               failed+=("$id"); continue
             fi
             ref=$(docker image inspect --format '{{index .RepoDigests 0}}' "$image" 2>/dev/null || echo "$image")
-            if ! docker run --rm --platform "linux/$ARCH" --user "$(id -u):$(id -g)" \
+            if ! timeout 120 docker run --rm --platform "linux/$ARCH" --user "$(id -u):$(id -g)" \
                  --entrypoint /libcheck -v "$PWD/libcheck:/libcheck:ro" -v "$PWD/out:/out" "$image" \
                  snapshot -complete=false -id "$id" -name "$name" -image "$ref" -kernel "$kernel" \
                  -arch "$ARCH" -o "/out/$id.$ARCH.json.gz"; then

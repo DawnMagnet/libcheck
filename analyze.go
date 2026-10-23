@@ -257,11 +257,12 @@ func (r *report) checkVersions(l *loader, targeted, verbose bool, add addFunc, f
 		}
 		if len(vr.missing) > 0 {
 			_, top := splitVer(vr.missing[0])
-			r.fails = append(r.fails, fmt.Sprintf("%s %s > %s", vr.fam, orDash(top), orDash(vr.have)))
+			r.fails = append(r.fails, fmt.Sprintf("%s needs %s, has %s", vr.fam, orDash(top), orDash(vr.have)))
 			fail("%s needs %s from %s, but %s provides only up to %s",
 				baseName(l.objs[vr.obj].path), shortList(vr.missing), vr.lib, who, orDash(vr.have))
 		}
 	}
+	sort.Strings(r.fails)
 	sort.SliceStable(shown, func(i, j int) bool {
 		a, b := shown[i], shown[j]
 		if (a.obj == mainKey) != (b.obj == mainKey) {

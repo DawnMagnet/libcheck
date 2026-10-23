@@ -104,8 +104,12 @@ func printMatrix(w io.Writer, reps []*report) {
 	fmt.Fprintf(w, "%s\n", bold(fmt.Sprintf("%-*s  %-*s  %-*s  %-*s  %s", widths[0], "TARGET", widths[1], "GLIBC",
 		widths[2], "LIBSTDC++", widths[3], "RESULT", "DETAIL")))
 	for _, rw := range rows {
-		fmt.Fprintf(w, "%-*s  %-*s  %-*s  %s%s  %s\n", widths[0], rw.id, widths[1], rw.glibc, widths[2], rw.cxx,
-			colorize(rw.status, rw.result), strings.Repeat(" ", widths[3]-len(rw.result)), rw.detail)
+		tail := ""
+		if rw.detail != "" {
+			tail = strings.Repeat(" ", widths[3]-len(rw.result)) + "  " + rw.detail
+		}
+		fmt.Fprintf(w, "%-*s  %-*s  %-*s  %s%s\n", widths[0], rw.id, widths[1], rw.glibc, widths[2], rw.cxx,
+			colorize(rw.status, rw.result), tail)
 	}
 	fmt.Fprintf(w, "\n%s\n", bold(fmt.Sprintf("%d of %d targets can run it", ok, len(rows))))
 }
