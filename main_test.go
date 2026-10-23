@@ -125,8 +125,9 @@ func patchedCopy(t *testing.T, src, from, to string) string {
 	return dst
 }
 
-// tooNewCopy returns a copy of sample that needs a GLIBC version nothing provides.
-func tooNewCopy(t *testing.T, sample string) string {
+// glibcDep returns one GLIBC_2.x requirement of sample, or skips the test
+// when the sample has none (for example on musl systems).
+func glibcDep(t *testing.T, sample string) string {
 	t.Helper()
 	f, err := elf.Open(sample)
 	if err != nil {
@@ -145,6 +146,13 @@ func tooNewCopy(t *testing.T, sample string) string {
 	if dep == "" {
 		t.Skip("sample has no GLIBC version requirements (non-glibc host)")
 	}
+	return dep
+}
+
+// tooNewCopy returns a copy of sample that needs a GLIBC version nothing provides.
+func tooNewCopy(t *testing.T, sample string) string {
+	t.Helper()
+	dep := glibcDep(t, sample)
 	return patchedCopy(t, sample, dep, "GLIBC_9"+strings.TrimPrefix(dep, "GLIBC_2"))
 }
 
@@ -308,6 +316,7 @@ func TestBaseImageTargetNeedsPackages(t *testing.T) {
 
 func TestMatrixForSeveralTargets(t *testing.T) {
 	sample := dynamicSample(t)
+	glibcDep(t, sample)
 	good := hostProfile(t)
 	good.ID = "newer-distro"
 
