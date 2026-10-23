@@ -1,0 +1,261 @@
+[
+  {
+    "id": "debian-10",
+    "name": "Debian 10 (buster)",
+    "image": "debian:10",
+    "kernel": "4.19"
+  },
+  {
+    "id": "debian-11",
+    "name": "Debian 11 (bullseye)",
+    "image": "debian:11",
+    "kernel": "5.10"
+  },
+  {
+    "id": "debian-12",
+    "name": "Debian 12 (bookworm)",
+    "image": "debian:12",
+    "kernel": "6.1"
+  },
+  {
+    "id": "debian-13",
+    "name": "Debian 13 (trixie)",
+    "image": "debian:13",
+    "kernel": "6.12"
+  },
+  {
+    "id": "ubuntu-16.04",
+    "name": "Ubuntu 16.04 LTS",
+    "image": "ubuntu:16.04",
+    "kernel": "4.4"
+  },
+  {
+    "id": "ubuntu-18.04",
+    "name": "Ubuntu 18.04 LTS",
+    "image": "ubuntu:18.04",
+    "kernel": "4.15"
+  },
+  {
+    "id": "ubuntu-20.04",
+    "name": "Ubuntu 20.04 LTS",
+    "image": "ubuntu:20.04",
+    "kernel": "5.4"
+  },
+  {
+    "id": "ubuntu-22.04",
+    "name": "Ubuntu 22.04 LTS",
+    "image": "ubuntu:22.04",
+    "kernel": "5.15"
+  },
+  {
+    "id": "ubuntu-24.04",
+    "name": "Ubuntu 24.04 LTS",
+    "image": "ubuntu:24.04",
+    "kernel": "6.8"
+  },
+  {
+    "id": "ubuntu-26.04",
+    "name": "Ubuntu 26.04 LTS",
+    "image": "ubuntu:26.04"
+  },
+  {
+    "id": "centos-7",
+    "name": "CentOS Linux 7",
+    "image": "quay.io/centos/centos:7",
+    "kernel": "3.10"
+  },
+  {
+    "id": "centos-stream-9",
+    "name": "CentOS Stream 9",
+    "image": "quay.io/centos/centos:stream9",
+    "kernel": "5.14"
+  },
+  {
+    "id": "centos-stream-10",
+    "name": "CentOS Stream 10",
+    "image": "quay.io/centos/centos:stream10",
+    "kernel": "6.12"
+  },
+  {
+    "id": "rhel-8",
+    "name": "Red Hat Enterprise Linux 8 (UBI)",
+    "image": "registry.access.redhat.com/ubi8/ubi",
+    "kernel": "4.18"
+  },
+  {
+    "id": "rocky-8",
+    "name": "Rocky Linux 8",
+    "image": "quay.io/rockylinux/rockylinux:8",
+    "kernel": "4.18"
+  },
+  {
+    "id": "almalinux-8",
+    "name": "AlmaLinux 8",
+    "image": "almalinux:8",
+    "kernel": "4.18"
+  },
+  {
+    "id": "rhel-9",
+    "name": "Red Hat Enterprise Linux 9 (UBI)",
+    "image": "registry.access.redhat.com/ubi9/ubi",
+    "kernel": "5.14"
+  },
+  {
+    "id": "rocky-9",
+    "name": "Rocky Linux 9",
+    "image": "quay.io/rockylinux/rockylinux:9",
+    "kernel": "5.14"
+  },
+  {
+    "id": "almalinux-9",
+    "name": "AlmaLinux 9",
+    "image": "almalinux:9",
+    "kernel": "5.14"
+  },
+  {
+    "id": "rhel-10",
+    "name": "Red Hat Enterprise Linux 10 (UBI)",
+    "image": "registry.access.redhat.com/ubi10/ubi",
+    "kernel": "6.12"
+  },
+  {
+    "id": "rocky-10",
+    "name": "Rocky Linux 10",
+    "image": "quay.io/rockylinux/rockylinux:10",
+    "kernel": "6.12"
+  },
+  {
+    "id": "almalinux-10",
+    "name": "AlmaLinux 10",
+    "image": "almalinux:10",
+    "kernel": "6.12"
+  },
+  {
+    "id": "oraclelinux-7",
+    "name": "Oracle Linux 7",
+    "image": "oraclelinux:7",
+    "kernel": "3.10"
+  },
+  {
+    "id": "oraclelinux-8",
+    "name": "Oracle Linux 8",
+    "image": "oraclelinux:8",
+    "kernel": "4.18"
+  },
+  {
+    "id": "oraclelinux-9",
+    "name": "Oracle Linux 9",
+    "image": "oraclelinux:9",
+    "kernel": "5.14"
+  },
+  {
+    "id": "oraclelinux-10",
+    "name": "Oracle Linux 10",
+    "image": "oraclelinux:10",
+    "kernel": "6.12"
+  },
+  {
+    "id": "fedora-42",
+    "name": "Fedora 42",
+    "image": "quay.io/fedora/fedora:42"
+  },
+  {
+    "id": "fedora-43",
+    "name": "Fedora 43",
+    "image": "quay.io/fedora/fedora:43"
+  },
+  {
+    "id": "fedora-44",
+    "name": "Fedora 44",
+    "image": "quay.io/fedora/fedora:44"
+  },
+  {
+    "id": "amazonlinux-2",
+    "name": "Amazon Linux 2",
+    "image": "public.ecr.aws/amazonlinux/amazonlinux:2",
+    "kernel": "4.14"
+  },
+  {
+    "id": "amazonlinux-2023",
+    "name": "Amazon Linux 2023",
+    "image": "public.ecr.aws/amazonlinux/amazonlinux:2023",
+    "kernel": "6.1"
+  },
+  {
+    "id": "opensuse-leap-15.6",
+    "name": "openSUSE Leap 15.6",
+    "image": "registry.opensuse.org/opensuse/leap:15.6",
+    "kernel": "6.4"
+  },
+  {
+    "id": "opensuse-leap-16.0",
+    "name": "openSUSE Leap 16.0",
+    "image": "registry.opensuse.org/opensuse/leap:16.0",
+    "kernel": "6.12"
+  },
+  {
+    "id": "opensuse-tumbleweed",
+    "name": "openSUSE Tumbleweed",
+    "image": "registry.opensuse.org/opensuse/tumbleweed:latest"
+  },
+  {
+    "id": "sles-15.6",
+    "name": "SUSE Linux Enterprise 15 SP6 (BCI)",
+    "image": "registry.suse.com/bci/bci-base:15.6",
+    "kernel": "6.4"
+  },
+  {
+    "id": "sles-15.7",
+    "name": "SUSE Linux Enterprise 15 SP7 (BCI)",
+    "image": "registry.suse.com/bci/bci-base:15.7",
+    "kernel": "6.4"
+  },
+  {
+    "id": "azurelinux-3.0",
+    "name": "Azure Linux 3.0",
+    "image": "mcr.microsoft.com/azurelinux/base/core:3.0",
+    "kernel": "6.6"
+  },
+  {
+    "id": "photon-4.0",
+    "name": "VMware Photon OS 4.0",
+    "image": "photon:4.0",
+    "kernel": "5.10"
+  },
+  {
+    "id": "photon-5.0",
+    "name": "VMware Photon OS 5.0",
+    "image": "photon:5.0",
+    "kernel": "6.1"
+  },
+  {
+    "id": "arch",
+    "name": "Arch Linux (rolling)",
+    "image": "archlinux:latest"
+  },
+  {
+    "id": "wolfi",
+    "name": "Wolfi (rolling)",
+    "image": "cgr.dev/chainguard/wolfi-base:latest"
+  },
+  {
+    "id": "alpine-3.20",
+    "name": "Alpine Linux 3.20 (musl)",
+    "image": "alpine:3.20"
+  },
+  {
+    "id": "alpine-3.21",
+    "name": "Alpine Linux 3.21 (musl)",
+    "image": "alpine:3.21"
+  },
+  {
+    "id": "alpine-3.22",
+    "name": "Alpine Linux 3.22 (musl)",
+    "image": "alpine:3.22"
+  },
+  {
+    "id": "alpine-3.23",
+    "name": "Alpine Linux 3.23 (musl)",
+    "image": "alpine:3.23"
+  }
+]

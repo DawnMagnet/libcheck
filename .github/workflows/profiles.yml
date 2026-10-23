@@ -1,0 +1,158 @@
+name: Profiles
+
+# Rebuilds the built-in target profiles (profiles/data) from the container
+# images listed in profiles/sources.json. Each image is snapshotted by running
+# the freshly built libcheck inside it. Scheduled and manual runs open a pull
+# request with the changes; pull requests only dry-run the pipeline.
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - profiles/sources.json
+      - .github/workflows/profiles.yml
+      - snapshot.go
+      - profile.go
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profiles-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    name: Snapshot images (${{ matrix.arch }}, shard ${{ matrix.shard }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+        include:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - name: Build libcheck
+        run: CGO_ENABLED=0 go build -trimpath -o libcheck .
+      - name: Snapshot every image
+        env:
+          ARCH: ${{ matrix.arch }}
+          SHARD: ${{ matrix.shard }}
+          SHARDS: 8
+        run: |
+          mkdir -p out
+          failed=()
+          # Registries rate-limit anonymous pulls, so retry those failures. Images
+          # without a registry host are Docker Hub official images, which are pulled
+          # through public mirrors first. Prints the reference that was pulled; the
+          # reason for a failure goes to pull.err.
+          pull() {
+            local image=$1 cand n err last=""
+            local -a cands=("$image")
+            if [[ "${image%%/*}" != *.* ]]; then
+              cands=("mirror.gcr.io/library/$image" "public.ecr.aws/docker/library/$image" "docker.io/library/$image")
+            fi
+            for cand in "${cands[@]}"; do
+              for n in 1 2 3; do
+                if err=$(timeout 120 docker pull --quiet --platform "linux/$ARCH" "$cand" 2>&1 >/dev/null); then
+                  echo "$cand"
+                  return 0
+                fi
+                last=$err
+                grep -qiE 'toomanyrequests|rate exceeded|limit exceeded|timeout|TLS|EOF|unavailable' <<<"$err" || break
+                sleep $((n * 5))
+              done
+            done
+            printf '%s' "${last//$'\n'/ }" > "$RUNNER_TEMP/pull.err"
+            return 1
+          }
+          while IFS= read -r src; do
+            id=$(jq -r .id <<<"$src"); name=$(jq -r .name <<<"$src")
+            image=$(jq -r .image <<<"$src"); kernel=$(jq -r '.kernel // ""' <<<"$src")
+            if ! cand=$(pull "$image"); then
+              echo "::warning title=$id::cannot pull $image for $ARCH: $(cat "$RUNNER_TEMP/pull.err")"
+              failed+=("$id"); continue
+            fi
+            digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$cand" 2>/dev/null | sed 's/.*@//')
+            ref=$image${digest:+@$digest}
+            if ! timeout 120 docker run --rm --platform "linux/$ARCH" --user "$(id -u):$(id -g)" \
+                 --entrypoint /libcheck -v "$PWD/libcheck:/libcheck:ro" -v "$PWD/out:/out" "$cand" \
+                 snapshot -complete=false -id "$id" -name "$name" -image "$ref" -kernel "$kernel" \
+                 -arch "$ARCH" -o "/out/$id.$ARCH.json.gz"; then
+              echo "::warning title=$id::snapshot failed"
+              failed+=("$id")
+            fi
+            docker image rm --force "$cand" >/dev/null 2>&1 || true
+          done < <(jq -c --argjson s "$SHARD" --argjson n "$SHARDS" 'to_entries[] | select(.key % $n == $s) | .value' profiles/sources.json)
+          {
+            echo "### $ARCH, shard $SHARD"
+            echo "Snapshotted $(find out -name '*.json.gz' | wc -l) images."
+            [ ${#failed[@]} -eq 0 ] || echo "Skipped: ${failed[*]}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: profiles-${{ matrix.arch }}-${{ matrix.shard }}
+          path: out/*.json.gz
+          if-no-files-found: warn
+
+  publish:
+    name: Update profiles
+    needs: snapshot
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: profiles-*
+          path: new
+          merge-multiple: true
+      - name: Merge changed profiles
+        run: |
+          mkdir -p profiles/data
+          ids=$(jq -r '.[].id' profiles/sources.json)
+          # Drop profiles whose source was removed.
+          for f in profiles/data/*.json.gz; do
+            [ -e "$f" ] || continue
+            id=${f##*/}; id=${id%.*.json.gz}
+            grep -qxF "$id" <<<"$ids" || git rm -q -f "$f"
+          done
+          # Replace a profile only when something other than its date changed.
+          norm() { zcat "$1" | jq -cS 'del(.generated)'; }
+          for f in new/*.json.gz; do
+            b=${f##*/}
+            if [ -f "profiles/data/$b" ] && [ "$(norm "profiles/data/$b")" = "$(norm "$f")" ]; then continue; fi
+            cp "$f" "profiles/data/$b"
+          done
+      - name: Check the profiles load
+        run: go run . targets
+      - name: Open pull request
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: chore/update-profiles
+          delete-branch: true
+          commit-message: "chore: update target profiles"
+          title: "chore: update target profiles"
+          body: |
+            Regenerated from the container images in `profiles/sources.json`
+            by the [Profiles workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+          add-paths: profiles/data

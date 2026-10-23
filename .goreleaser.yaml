@@ -15,9 +15,26 @@ builds:
       - -s -w -X main.version={{ .Version }}
     mod_timestamp: "{{ .CommitTimestamp }}"
 
+  # Analysing the local host needs Linux, but checking against the built-in
+  # target systems works anywhere.
+  - id: libcheck-portable
+    main: .
+    binary: libcheck
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
 archives:
   - id: libcheck
     formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
     # Stable names so that releases/latest/download/<name> URLs keep working.
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
     files: [LICENSE, README.md]

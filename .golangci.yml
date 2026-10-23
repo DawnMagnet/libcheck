@@ -12,6 +12,10 @@ linters:
       exclude-functions:
         - fmt.Fprintf
         - fmt.Fprintln
+        - fmt.Fprint
+        - (*os.File).Close
+        - (io/fs.File).Close
+        - (*compress/gzip.Reader).Close
         - (*debug/elf.File).Close
 
 formatters:
