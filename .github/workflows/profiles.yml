@@ -1,0 +1,128 @@
+name: Profiles
+
+# Rebuilds the built-in target profiles (profiles/data) from the container
+# images listed in profiles/sources.json. Each image is snapshotted by running
+# the freshly built libcheck inside it. Scheduled and manual runs open a pull
+# request with the changes; pull requests only dry-run the pipeline.
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - profiles/sources.json
+      - .github/workflows/profiles.yml
+      - snapshot.go
+      - profile.go
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profiles-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    name: Snapshot images (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: amd64, runner: ubuntu-24.04 }
+          - { arch: arm64, runner: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - name: Build libcheck
+        run: CGO_ENABLED=0 go build -trimpath -o libcheck .
+      - name: Snapshot every image
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          mkdir -p out
+          failed=()
+          while IFS= read -r src; do
+            id=$(jq -r .id <<<"$src"); name=$(jq -r .name <<<"$src")
+            image=$(jq -r .image <<<"$src"); kernel=$(jq -r '.kernel // ""' <<<"$src")
+            if ! docker pull --quiet --platform "linux/$ARCH" "$image" >/dev/null; then
+              echo "::warning title=$id::no $ARCH image for $image"
+              failed+=("$id"); continue
+            fi
+            ref=$(docker image inspect --format '{{index .RepoDigests 0}}' "$image" 2>/dev/null || echo "$image")
+            if ! docker run --rm --platform "linux/$ARCH" --user "$(id -u):$(id -g)" \
+                 --entrypoint /libcheck -v "$PWD/libcheck:/libcheck:ro" -v "$PWD/out:/out" "$image" \
+                 snapshot -complete=false -id "$id" -name "$name" -image "$ref" -kernel "$kernel" \
+                 -arch "$ARCH" -o "/out/$id.$ARCH.json.gz"; then
+              echo "::warning title=$id::snapshot failed"
+              failed+=("$id")
+            fi
+            docker image rm --force "$image" >/dev/null 2>&1 || true
+          done < <(jq -c '.[]' profiles/sources.json)
+          {
+            echo "### $ARCH"
+            echo "Snapshotted $(find out -name '*.json.gz' | wc -l) images."
+            [ ${#failed[@]} -eq 0 ] || echo "Skipped: ${failed[*]}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: profiles-${{ matrix.arch }}
+          path: out/*.json.gz
+          if-no-files-found: error
+
+  publish:
+    name: Update profiles
+    needs: snapshot
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: profiles-*
+          path: new
+          merge-multiple: true
+      - name: Merge changed profiles
+        run: |
+          mkdir -p profiles/data
+          ids=$(jq -r '.[].id' profiles/sources.json)
+          # Drop profiles whose source was removed.
+          for f in profiles/data/*.json.gz; do
+            [ -e "$f" ] || continue
+            id=${f##*/}; id=${id%.*.json.gz}
+            grep -qxF "$id" <<<"$ids" || git rm -q -f "$f"
+          done
+          # Replace a profile only when something other than its date changed.
+          norm() { zcat "$1" | jq -cS 'del(.generated)'; }
+          for f in new/*.json.gz; do
+            b=${f##*/}
+            if [ -f "profiles/data/$b" ] && [ "$(norm "profiles/data/$b")" = "$(norm "$f")" ]; then continue; fi
+            cp "$f" "profiles/data/$b"
+          done
+      - name: Check the profiles load
+        run: go run . targets
+      - name: Open pull request
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: chore/update-profiles
+          delete-branch: true
+          commit-message: "chore: update target profiles"
+          title: "chore: update target profiles"
+          body: |
+            Regenerated from the container images in `profiles/sources.json`
+            by the [Profiles workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+          add-paths: profiles/data
