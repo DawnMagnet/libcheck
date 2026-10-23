@@ -54,34 +54,47 @@ jobs:
         run: |
           mkdir -p out
           failed=()
-          # Registries rate-limit anonymous pulls, so retry those failures.
+          # Registries rate-limit anonymous pulls, so retry those failures. Images
+          # without a registry host are Docker Hub official images, which are pulled
+          # through public mirrors first. Prints the reference that was pulled; the
+          # reason for a failure goes to pull.err.
           pull() {
-            local n=0 err
-            until err=$(timeout 120 docker pull --quiet --platform "linux/$ARCH" "$1" 2>&1 >/dev/null); do
-              n=$((n + 1))
-              if [ "$n" -ge 5 ] || ! grep -qiE 'toomanyrequests|rate exceeded|timeout|TLS|EOF|unavailable' <<<"$err"; then
-                echo "$err" | tr '\n' ' '
-                return 1
-              fi
-              sleep $((n * 10))
+            local image=$1 cand n err last=""
+            local -a cands=("$image")
+            if [[ "${image%%/*}" != *.* ]]; then
+              cands=("mirror.gcr.io/library/$image" "public.ecr.aws/docker/library/$image" "docker.io/library/$image")
+            fi
+            for cand in "${cands[@]}"; do
+              for n in 1 2 3; do
+                if err=$(timeout 120 docker pull --quiet --platform "linux/$ARCH" "$cand" 2>&1 >/dev/null); then
+                  echo "$cand"
+                  return 0
+                fi
+                last=$err
+                grep -qiE 'toomanyrequests|rate exceeded|limit exceeded|timeout|TLS|EOF|unavailable' <<<"$err" || break
+                sleep $((n * 5))
+              done
             done
+            printf '%s' "${last//$'\n'/ }" > "$RUNNER_TEMP/pull.err"
+            return 1
           }
           while IFS= read -r src; do
             id=$(jq -r .id <<<"$src"); name=$(jq -r .name <<<"$src")
             image=$(jq -r .image <<<"$src"); kernel=$(jq -r '.kernel // ""' <<<"$src")
-            if ! reason=$(pull "$image"); then
-              echo "::warning title=$id::cannot pull $image for $ARCH: $reason"
+            if ! cand=$(pull "$image"); then
+              echo "::warning title=$id::cannot pull $image for $ARCH: $(cat "$RUNNER_TEMP/pull.err")"
               failed+=("$id"); continue
             fi
-            ref=$(docker image inspect --format '{{index .RepoDigests 0}}' "$image" 2>/dev/null || echo "$image")
+            digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$cand" 2>/dev/null | sed 's/.*@//')
+            ref=$image${digest:+@$digest}
             if ! timeout 120 docker run --rm --platform "linux/$ARCH" --user "$(id -u):$(id -g)" \
-                 --entrypoint /libcheck -v "$PWD/libcheck:/libcheck:ro" -v "$PWD/out:/out" "$image" \
+                 --entrypoint /libcheck -v "$PWD/libcheck:/libcheck:ro" -v "$PWD/out:/out" "$cand" \
                  snapshot -complete=false -id "$id" -name "$name" -image "$ref" -kernel "$kernel" \
                  -arch "$ARCH" -o "/out/$id.$ARCH.json.gz"; then
               echo "::warning title=$id::snapshot failed"
               failed+=("$id")
             fi
-            docker image rm --force "$image" >/dev/null 2>&1 || true
+            docker image rm --force "$cand" >/dev/null 2>&1 || true
           done < <(jq -c --argjson s "$SHARD" --argjson n "$SHARDS" 'to_entries[] | select(.key % $n == $s) | .value' profiles/sources.json)
           {
             echo "### $ARCH, shard $SHARD"

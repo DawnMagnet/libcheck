@@ -2,61 +2,61 @@
   {
     "id": "debian-10",
     "name": "Debian 10 (buster)",
-    "image": "public.ecr.aws/docker/library/debian:10",
+    "image": "debian:10",
     "kernel": "4.19"
   },
   {
     "id": "debian-11",
     "name": "Debian 11 (bullseye)",
-    "image": "public.ecr.aws/docker/library/debian:11",
+    "image": "debian:11",
     "kernel": "5.10"
   },
   {
     "id": "debian-12",
     "name": "Debian 12 (bookworm)",
-    "image": "public.ecr.aws/docker/library/debian:12",
+    "image": "debian:12",
     "kernel": "6.1"
   },
   {
     "id": "debian-13",
     "name": "Debian 13 (trixie)",
-    "image": "public.ecr.aws/docker/library/debian:13",
+    "image": "debian:13",
     "kernel": "6.12"
   },
   {
     "id": "ubuntu-16.04",
     "name": "Ubuntu 16.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:16.04",
+    "image": "ubuntu:16.04",
     "kernel": "4.4"
   },
   {
     "id": "ubuntu-18.04",
     "name": "Ubuntu 18.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:18.04",
+    "image": "ubuntu:18.04",
     "kernel": "4.15"
   },
   {
     "id": "ubuntu-20.04",
     "name": "Ubuntu 20.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:20.04",
+    "image": "ubuntu:20.04",
     "kernel": "5.4"
   },
   {
     "id": "ubuntu-22.04",
     "name": "Ubuntu 22.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:22.04",
+    "image": "ubuntu:22.04",
     "kernel": "5.15"
   },
   {
     "id": "ubuntu-24.04",
     "name": "Ubuntu 24.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:24.04",
+    "image": "ubuntu:24.04",
     "kernel": "6.8"
   },
   {
     "id": "ubuntu-26.04",
     "name": "Ubuntu 26.04 LTS",
-    "image": "public.ecr.aws/docker/library/ubuntu:26.04"
+    "image": "ubuntu:26.04"
   },
   {
     "id": "centos-7",
@@ -91,7 +91,7 @@
   {
     "id": "almalinux-8",
     "name": "AlmaLinux 8",
-    "image": "public.ecr.aws/docker/library/almalinux:8",
+    "image": "almalinux:8",
     "kernel": "4.18"
   },
   {
@@ -109,7 +109,7 @@
   {
     "id": "almalinux-9",
     "name": "AlmaLinux 9",
-    "image": "public.ecr.aws/docker/library/almalinux:9",
+    "image": "almalinux:9",
     "kernel": "5.14"
   },
   {
@@ -127,31 +127,31 @@
   {
     "id": "almalinux-10",
     "name": "AlmaLinux 10",
-    "image": "public.ecr.aws/docker/library/almalinux:10",
+    "image": "almalinux:10",
     "kernel": "6.12"
   },
   {
     "id": "oraclelinux-7",
     "name": "Oracle Linux 7",
-    "image": "public.ecr.aws/docker/library/oraclelinux:7",
+    "image": "oraclelinux:7",
     "kernel": "3.10"
   },
   {
     "id": "oraclelinux-8",
     "name": "Oracle Linux 8",
-    "image": "public.ecr.aws/docker/library/oraclelinux:8",
+    "image": "oraclelinux:8",
     "kernel": "4.18"
   },
   {
     "id": "oraclelinux-9",
     "name": "Oracle Linux 9",
-    "image": "public.ecr.aws/docker/library/oraclelinux:9",
+    "image": "oraclelinux:9",
     "kernel": "5.14"
   },
   {
     "id": "oraclelinux-10",
     "name": "Oracle Linux 10",
-    "image": "public.ecr.aws/docker/library/oraclelinux:10",
+    "image": "oraclelinux:10",
     "kernel": "6.12"
   },
   {
@@ -219,19 +219,19 @@
   {
     "id": "photon-4.0",
     "name": "VMware Photon OS 4.0",
-    "image": "public.ecr.aws/docker/library/photon:4.0",
+    "image": "photon:4.0",
     "kernel": "5.10"
   },
   {
     "id": "photon-5.0",
     "name": "VMware Photon OS 5.0",
-    "image": "public.ecr.aws/docker/library/photon:5.0",
+    "image": "photon:5.0",
     "kernel": "6.1"
   },
   {
     "id": "arch",
     "name": "Arch Linux (rolling)",
-    "image": "docker.io/library/archlinux:latest"
+    "image": "archlinux:latest"
   },
   {
     "id": "wolfi",
@@ -241,21 +241,21 @@
   {
     "id": "alpine-3.20",
     "name": "Alpine Linux 3.20 (musl)",
-    "image": "public.ecr.aws/docker/library/alpine:3.20"
+    "image": "alpine:3.20"
   },
   {
     "id": "alpine-3.21",
     "name": "Alpine Linux 3.21 (musl)",
-    "image": "public.ecr.aws/docker/library/alpine:3.21"
+    "image": "alpine:3.21"
   },
   {
     "id": "alpine-3.22",
     "name": "Alpine Linux 3.22 (musl)",
-    "image": "public.ecr.aws/docker/library/alpine:3.22"
+    "image": "alpine:3.22"
   },
   {
     "id": "alpine-3.23",
     "name": "Alpine Linux 3.23 (musl)",
-    "image": "public.ecr.aws/docker/library/alpine:3.23"
+    "image": "alpine:3.23"
   }
 ]
