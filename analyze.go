@@ -128,7 +128,8 @@ func profileSummary(p *Profile) string {
 		notes = append(notes, "base image")
 	}
 	if p.Image != "" {
-		notes = append(notes, p.Image)
+		image, _, _ := strings.Cut(p.Image, "@")
+		notes = append(notes, image)
 	}
 	if p.Generated != "" {
 		notes = append(notes, "snapshot "+p.Generated)
@@ -181,7 +182,7 @@ func (r *report) checkKernel(abi [3]uint32, prof *Profile, add addFunc, fail fun
 		add("INFO", "kernel", fmt.Sprintf("needs >= %s (target kernel unknown)", need))
 		return
 	}
-	have := dotted(tk)
+	have := prof.Kernel
 	detail := fmt.Sprintf("needs >= %s, target ships %s", need, have)
 	if prof.Complete {
 		detail = fmt.Sprintf("needs >= %s, target runs %s", need, have)
